@@ -49,28 +49,53 @@ namespace DodgerGame
             pointsWings[6] = new Point(Center.X + 95, Center.Y + 7);
             pointsWings[7] = new Point(Center.X, Center.Y + 15);
 
-            g.FillPolygon(Brushes.DarkGray, pointsWings);
+            g.FillPolygon(Brushes.Gray, pointsWings);
 
 
             //Defines cabin/main fuselage
-            Point[] pointsCabin = new Point[5];
+            Point[] pointsCabin = new Point[6];
 
-            pointsCabin[0] = new Point(Center.X + 2, Center.Y - 100);
+            pointsCabin[0] = new Point(Center.X + 7, Center.Y - 95);
             pointsCabin[1] = new Point(Center.X + 25, Center.Y);
-            pointsCabin[2] = new Point(Center.X, Center.Y + 20);
+            pointsCabin[2] = new Point(Center.X, Center.Y + 10);
             pointsCabin[3] = new Point(Center.X - 25, Center.Y);
-            pointsCabin[4] = new Point(Center.X - 2, Center.Y - 100);
-            g.FillPolygon(Brushes.White, pointsCabin);
+            pointsCabin[4] = new Point(Center.X - 7, Center.Y - 95);
+            pointsCabin[5] = new Point(Center.X, Center.Y - 100);
 
+            g.FillPolygon(Brushes.DarkGray, pointsCabin);
 
-            //Defines wing area and fuselage area to collide with asteroids
-            Rectangle = new Rectangle(Center.X - 90, Center.Y - 15, 180, 25);
-            Fuselage = new Rectangle(Center.X - 13, Center.Y - 100, 26, 140);
+            //Defines the afterburner
+            Point[] burnerYellow = new Point[11];
 
-            //Uncomment to check the rectangles area that collide with asteroids
-            //e.Graphics.DrawRectangle(pen, Rectangle);  
-            //e.Graphics.DrawRectangle(pen, Fuselage);
+            burnerYellow[0] = new Point(Center.X - 15, Center.Y + 30);
+            burnerYellow[1] = new Point(Center.X + 15, Center.Y + 30);
+            burnerYellow[2] = new Point(Center.X + 20, Center.Y + 60);
+            burnerYellow[3] = new Point(Center.X + 10, Center.Y + 52);
+            burnerYellow[4] = new Point(Center.X + 7, Center.Y + 59);
+            burnerYellow[5] = new Point(Center.X + 3, Center.Y + 52);
+            burnerYellow[6] = new Point(Center.X, Center.Y + 60);
+            burnerYellow[7] = new Point(Center.X - 3, Center.Y + 52);
+            burnerYellow[8] = new Point(Center.X - 7, Center.Y + 59);
+            burnerYellow[9] = new Point(Center.X - 10, Center.Y + 52);
+            burnerYellow[10] = new Point(Center.X - 20, Center.Y + 60);
 
+            g.FillPolygon(Brushes.Yellow, burnerYellow);
+
+            Point[] burnerRed = new Point[11];
+
+            burnerRed[0] = new Point(Center.X - 9, Center.Y + 20);
+            burnerRed[1] = new Point(Center.X + 9, Center.Y + 20);
+            burnerRed[2] = new Point(Center.X + 12, Center.Y + 50);
+            burnerRed[3] = new Point(Center.X + 10, Center.Y + 42);
+            burnerRed[4] = new Point(Center.X + 7, Center.Y + 49);
+            burnerRed[5] = new Point(Center.X + 3, Center.Y + 42);
+            burnerRed[6] = new Point(Center.X, Center.Y + 50);
+            burnerRed[7] = new Point(Center.X - 3, Center.Y + 42);
+            burnerRed[8] = new Point(Center.X - 7, Center.Y + 49);
+            burnerRed[9] = new Point(Center.X - 10, Center.Y + 42);
+            burnerRed[10] = new Point(Center.X - 12, Center.Y + 50);
+
+            g.FillPolygon(Brushes.Red, burnerRed);
 
             //Defines rear fuselage
             Point[] pointsRearFuselage = new Point[7];
@@ -83,19 +108,27 @@ namespace DodgerGame
             pointsRearFuselage[5] = new Point(Center.X - 5, Center.Y + 40);
             pointsRearFuselage[6] = new Point(Center.X - 15, Center.Y + 30);
 
-            g.FillPolygon(Brushes.White, pointsRearFuselage);
+            g.FillPolygon(Brushes.DarkGray, pointsRearFuselage);
 
             //Defines pilot cabin/canopy
-            Point[] canopy = new Point[6];
+            Point[] pointsCanopy = new Point[6];
 
-            canopy[0] = new Point(Center.X - 3, Center.Y - 15);
-            canopy[1] = new Point(Center.X - 7, Center.Y - 25);
-            canopy[2] = new Point(Center.X - 2, Center.Y - 55);
-            canopy[3] = new Point(Center.X + 2, Center.Y - 55);
-            canopy[4] = new Point(Center.X + 7, Center.Y - 25);
-            canopy[5] = new Point(Center.X + 3, Center.Y - 15);
+            pointsCanopy[0] = new Point(Center.X - 3, Center.Y - 15);
+            pointsCanopy[1] = new Point(Center.X - 8, Center.Y - 25);
+            pointsCanopy[2] = new Point(Center.X - 3, Center.Y - 55);
+            pointsCanopy[3] = new Point(Center.X + 3, Center.Y - 55);
+            pointsCanopy[4] = new Point(Center.X + 8, Center.Y - 25);
+            pointsCanopy[5] = new Point(Center.X + 3, Center.Y - 15);
 
-            g.FillPolygon(Brushes.DarkMagenta, canopy);
+            g.FillPolygon(Brushes.DarkMagenta, pointsCanopy);
+
+            //Defines wing area and fuselage area to collide with asteroids
+            Rectangle = new Rectangle(Center.X - 90, Center.Y - 15, 180, 25);
+            Fuselage = new Rectangle(Center.X - 13, Center.Y - 95, 26, 150);
+
+            //Uncomment the lines below to check the rectangles area that collide with asteroids
+            //e.Graphics.DrawRectangle(pen, Rectangle);
+            //e.Graphics.DrawRectangle(pen, Fuselage);
 
         }
     }

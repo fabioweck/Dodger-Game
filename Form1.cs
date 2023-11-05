@@ -17,7 +17,7 @@ namespace DodgerGame
 
         Ship player = new Ship(new Point(600, 700));
         List<Asteroids> asteroidField;
-        List<Bullets> bullets;
+        List<Bullet> bullets;
         int counter = 0;
         int collisions = 0;
         int score = 0;
@@ -27,9 +27,10 @@ namespace DodgerGame
         public Form1()
         {
             InitializeComponent();
-            bullets = new List<Bullets>();
-            this.StartPosition = FormStartPosition.CenterParent;
+            bullets = new List<Bullet>(); //Initializes the list of bullets
             this.DoubleBuffered = true;
+            this.Location = new Point(10, 10);
+            
         }
 
         private void Initialize()
@@ -54,6 +55,21 @@ namespace DodgerGame
             }
         }
 
+        private void playToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GameLoop.Start();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void gameInstructionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("The player moves the ship with arrow keys and shoots with space bar.\nIf the ship reaches any of the screen borders a teleportation occurs moving the ship to the opposite side of the screen.\nDuring the game, the player must avoid colliding the ship with asteroids on the screen in order to maintain health as much as possible.\nPoints increase over time and, as a bonus, every 15 seconds the health increases by 5%.\nGame is over when the health is completely depleted.", "How to play");
+        }
+
         private void GenerateNewAsteroid()
         {
             int[] movement = { -4, -3, -2, -1, 1, 2, 3, 4 };
@@ -74,7 +90,6 @@ namespace DodgerGame
         private void Form1_Load(object sender, EventArgs e)
         {
             GameLoop.Interval = 10;
-            GameLoop.Start();
 
             Initialize(); //Draws asteroids on the screen
 
@@ -87,6 +102,7 @@ namespace DodgerGame
 
         protected void PaintObjects(Object sender,  PaintEventArgs e)
         {
+
             Pen pen = new Pen(Color.White, 2);
 
             Rectangle rectangle = new Rectangle(100, 100, 1000, 700);
@@ -99,75 +115,53 @@ namespace DodgerGame
 
             player.Draw(e);
 
+            //Iterates over all asteroids
             int assetIndexAsteroids = asteroidField.Count - 1;
-            int assetIndexBullets = bullets.Count - 1;
-
             while (assetIndexAsteroids > 0)
             {
-                if(assetIndexBullets < 0)
+                //Checks collision between an asteroid and the ship
+                //If a collision is detected, the asteroid is removed from the list
+                //Another asteroid is added afterwards
+                if (asteroidField[assetIndexAsteroids].Collision(player))
                 {
-                    if (asteroidField[assetIndexAsteroids].Collision(player))
+                    asteroidField.RemoveAt(assetIndexAsteroids);
+                    collisions++;
+                    this.BackColor = Color.FromArgb(255, 75, 0, 0);
+                    GenerateNewAsteroid();
+
+                    //If the player reaches the limit of collisions, the game finishes
+                    if (collisions == 100)
                     {
-                        asteroidField.RemoveAt(assetIndexAsteroids);
-                        collisions++;
-                        GenerateNewAsteroid();
-                        if (collisions == 100)
-                        {
-                            EndGame();
-                        }
-                    }
-                    else
-                    {
-                        asteroidField[assetIndexAsteroids].Draw(e);
+                        EndGame();
                     }
                 }
+
                 else
-                { 
-                    for(int i = 0; i <= assetIndexBullets; i++)
+                {
+                    //Draws the asteroid and then check if it's been shot by bullet
+                    asteroidField[assetIndexAsteroids].Draw(e);
+
+                    //This foreach iterates over list of bullets
+                    foreach (Bullet bullet in bullets)
                     {
-                        if (asteroidField[assetIndexAsteroids].Shot(bullets[i]))
+                        //If the asteroid has been shot, it is removed from the list
+                        //And the bullet is set out of the border, instead of being removed
+                        //When the bullet crosses the split border, another loop inside GameLoop_Tick
+                        //removes it from the list
+                        if (asteroidField[assetIndexAsteroids].Shot(bullet))
                         {
                             asteroidField.RemoveAt(assetIndexAsteroids);
+                            bullet.Center = new Point(bullet.Center.X, 0);
+                            GenerateNewAsteroid();
                         }
                         else
-                        {
-                            bullets[assetIndexBullets].Draw(e);
-                            asteroidField[assetIndexAsteroids].Draw(e);
+                        {    
+                            bullet.Draw(e);
                         }
                     }
-
-                    //foreach(Bullets bullet in bullets)
-                    //{
-                    //    
-                    //    else
-                    //    {
-                    //        asteroidField[assetIndexAsteroids].Draw(e);
-                    //        bullets[assetIndexBullets].Draw(e);
-                    //    }
-                    //}    
-
-
-
-                    //else
-                    //{
-                    //    asteroidField[assetIndexAsteroids].Draw(e);
-                    //    bullets[assetIndexBullets].Draw(e);
-                    //}
-
-                    //if (asteroidField[assetIndexAsteroids].Collision(player))
-                    //{   
-                    //    asteroidField.RemoveAt(assetIndexAsteroids);
-                    //    collisions++;
-                    //    GenerateNewAsteroid();
-                    //    if (collisions == 100)
-                    //    {
-                    //        EndGame();
-                    //    }
-                    //} 
-
-                }
-
-               assetIndexAsteroids--;
+                }                  
+               
+                assetIndexAsteroids--;
 
             }
             
@@ -194,10 +188,21 @@ namespace DodgerGame
             {
                 asteroid.Move(0, this.Size.Width, 0, this.Size.Height);
             }
-
-            foreach(Bullets bullet in bullets)
+            
+            foreach(Bullet bullet in bullets)
             {
                 bullet.MoveOnlyY();
+            }
+
+            //This verifies if a bullet crossed the game border, if yes, removes the bullet 
+            int assetIndexBullets = bullets.Count - 1;
+            while (assetIndexBullets >= 0)
+            {
+                if (bullets[assetIndexBullets].Center.Y < 100)
+                {
+                    bullets.RemoveAt(assetIndexBullets);
+                }
+                assetIndexBullets--;
             }
 
             counter++;
@@ -208,9 +213,9 @@ namespace DodgerGame
                 score++;
             }
 
-            if(score != 0 && score % 10 == 0 && counter == 0)
+            if(score != 0 && score % 15 == 0 && counter == 0)
             {
-                if(1000 - (collisions * 4) > 400)
+                if(400 - (collisions * 4) > 380)
                 {
                     collisions = 0;
                 }
@@ -221,13 +226,28 @@ namespace DodgerGame
     
             }
 
+            this.BackColor = Color.Black;
             this.Refresh();
         }
 
         private void EndGame()
         {
             GameLoop.Stop();
-            MessageBox.Show("You die");
+            DialogResult = MessageBox.Show($"You finished the game with {score} points\nWould you like to play again?", "Game over!", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk);
+            if(DialogResult == DialogResult.Yes)
+            {
+                player = new Ship(new Point(600, 700));
+                asteroidField.Clear();
+                bullets.Clear();
+                Initialize();
+                score = 0;
+                collisions = 0;
+                GameLoop.Start();
+            }
+            else
+            {
+                Application.Exit();
+            }
         }
 
         private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -256,8 +276,8 @@ namespace DodgerGame
 
         private void Shoot()
         {
-            Bullets newBullet = new Bullets(new Point(player.Center.X, player.Center.Y - 90));
-            newBullet.MoveY = 10;
+            Bullet newBullet = new Bullet(new Point(player.Center.X, player.Center.Y - 90));
+            newBullet.MoveY = 15;
             bullets.Add(newBullet);
         }
 
