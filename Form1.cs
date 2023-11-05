@@ -17,6 +17,7 @@ namespace DodgerGame
 
         Ship player = new Ship(new Point(600, 700));
         List<Asteroids> asteroidField;
+        List<Bullets> bullets;
         int counter = 0;
         int collisions = 0;
         int score = 0;
@@ -26,6 +27,7 @@ namespace DodgerGame
         public Form1()
         {
             InitializeComponent();
+            bullets = new List<Bullets>();
             this.StartPosition = FormStartPosition.CenterParent;
             this.DoubleBuffered = true;
         }
@@ -52,7 +54,7 @@ namespace DodgerGame
             }
         }
 
-        private void GenerateAsteroid()
+        private void GenerateNewAsteroid()
         {
             int[] movement = { -4, -3, -2, -1, 1, 2, 3, 4 };
 
@@ -97,29 +99,78 @@ namespace DodgerGame
 
             player.Draw(e);
 
-            int assetIndex = asteroidField.Count - 1;
+            int assetIndexAsteroids = asteroidField.Count - 1;
+            int assetIndexBullets = bullets.Count - 1;
 
-            while(assetIndex > 0)
+            while (assetIndexAsteroids > 0)
             {
-
-                if (asteroidField[assetIndex].Collision(player))
+                if(assetIndexBullets < 0)
                 {
-                    asteroidField.RemoveAt(assetIndex);
-                    collisions++;
-                    GenerateAsteroid();
-                    if(collisions == 10)
+                    if (asteroidField[assetIndexAsteroids].Collision(player))
                     {
-                        EndGame();
+                        asteroidField.RemoveAt(assetIndexAsteroids);
+                        collisions++;
+                        GenerateNewAsteroid();
+                        if (collisions == 100)
+                        {
+                            EndGame();
+                        }
+                    }
+                    else
+                    {
+                        asteroidField[assetIndexAsteroids].Draw(e);
                     }
                 }
                 else
-                {
-                    asteroidField[assetIndex].Draw(e);
+                { 
+                    for(int i = 0; i <= assetIndexBullets; i++)
+                    {
+                        if (asteroidField[assetIndexAsteroids].Shot(bullets[i]))
+                        {
+                            asteroidField.RemoveAt(assetIndexAsteroids);
+                        }
+                        else
+                        {
+                            bullets[assetIndexBullets].Draw(e);
+                            asteroidField[assetIndexAsteroids].Draw(e);
+                        }
+                    }
+
+                    //foreach(Bullets bullet in bullets)
+                    //{
+                    //    
+                    //    else
+                    //    {
+                    //        asteroidField[assetIndexAsteroids].Draw(e);
+                    //        bullets[assetIndexBullets].Draw(e);
+                    //    }
+                    //}    
+
+
+
+                    //else
+                    //{
+                    //    asteroidField[assetIndexAsteroids].Draw(e);
+                    //    bullets[assetIndexBullets].Draw(e);
+                    //}
+
+                    //if (asteroidField[assetIndexAsteroids].Collision(player))
+                    //{   
+                    //    asteroidField.RemoveAt(assetIndexAsteroids);
+                    //    collisions++;
+                    //    GenerateNewAsteroid();
+                    //    if (collisions == 100)
+                    //    {
+                    //        EndGame();
+                    //    }
+                    //} 
+
                 }
 
-                assetIndex--;
-            }
+               assetIndexAsteroids--;
 
+            }
+            
             e.Graphics.ResetClip();
 
             e.Graphics.DrawString($"Score: {score}", scoreFont, Brushes.White, new Point(200, 50));
@@ -144,6 +195,11 @@ namespace DodgerGame
                 asteroid.Move(0, this.Size.Width, 0, this.Size.Height);
             }
 
+            foreach(Bullets bullet in bullets)
+            {
+                bullet.MoveOnlyY();
+            }
+
             counter++;
 
             if(counter >= 60)
@@ -154,7 +210,15 @@ namespace DodgerGame
 
             if(score != 0 && score % 10 == 0 && counter == 0)
             {
-                collisions -= 5;
+                if(1000 - (collisions * 4) > 400)
+                {
+                    collisions = 0;
+                }
+                else
+                {
+                    collisions -= 5;
+                }
+    
             }
 
             this.Refresh();
@@ -184,6 +248,17 @@ namespace DodgerGame
             {
                 player.MoveY = 2;
             }
+            if(e.KeyCode == Keys.Space)
+            {
+                Shoot();
+            }
+        }
+
+        private void Shoot()
+        {
+            Bullets newBullet = new Bullets(new Point(player.Center.X, player.Center.Y - 90));
+            newBullet.MoveY = 10;
+            bullets.Add(newBullet);
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)

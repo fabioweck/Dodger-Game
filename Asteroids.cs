@@ -36,5 +36,17 @@ namespace DodgerGame
                 return false;
             }
         }
+
+        public bool Shot(Bullets bullet)
+        {
+            if (Rectangle.IntersectsWith(bullet.Rectangle))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }
