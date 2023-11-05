@@ -8,10 +8,10 @@ using System.Windows.Forms;
 
 namespace DodgerGame
 {
-    public class Bullets : Asset
+    public class Bullet : Asset
     {
 
-        public Bullets(Point center)
+        public Bullet(Point center)
         {
             Center = center;
         }
@@ -23,8 +23,10 @@ namespace DodgerGame
             g.FillRectangle(Brushes.Yellow, bullet);
 
             Rectangle = new Rectangle(Center.X, Center.Y, 5, 10);
-            Pen pen = new Pen(Brushes.Blue, 2);
-            g.DrawRectangle(pen, bullet);
+
+            //Uncomment lines below to check the bullet rectangle
+            //Pen pen = new Pen(Brushes.Blue, 2);
+            //g.DrawRectangle(pen, bullet);
         }
 
         public void MoveOnlyY()

@@ -37,7 +37,7 @@ namespace DodgerGame
             }
         }
 
-        public bool Shot(Bullets bullet)
+        public bool Shot(Bullet bullet)
         {
             if (Rectangle.IntersectsWith(bullet.Rectangle))
             {
