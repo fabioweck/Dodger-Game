@@ -21,10 +21,12 @@ namespace DodgerGame
 
         public override void Draw(PaintEventArgs e)
         {
+            //Rectangle defines the area of collision
             Rectangle = new Rectangle(Center.X, Center.Y, Radius, Radius);
             e.Graphics.DrawEllipse(pen, Rectangle);
         }
         
+        //Checks the collision with ship
         public bool Collision(Ship ship)
         {
             if (Rectangle.IntersectsWith(ship.Rectangle) || Rectangle.IntersectsWith(ship.Fuselage))
@@ -37,6 +39,7 @@ namespace DodgerGame
             }
         }
 
+        //Checks the collision with bullets
         public bool Shot(Bullet bullet)
         {
             if (Rectangle.IntersectsWith(bullet.Rectangle))
