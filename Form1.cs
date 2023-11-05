@@ -18,21 +18,21 @@ namespace DodgerGame
         Ship player = new Ship(new Point(600, 700));
         List<Asteroids> asteroidField;
         List<Bullet> bullets;
-        int counter = 0;
-        int collisions = 0;
-        int score = 0;
+        int counter = 0;        //Counts time (cicles of 60)
+        int collisions = 0;     //Counts collision to determine damage
+        int score = 0;          //Counts score based on every second
         Font scoreFont = new Font("Verdana", 25, FontStyle.Bold);
- 
 
         public Form1()
         {
             InitializeComponent();
-            bullets = new List<Bullet>(); //Initializes the list of bullets
-            this.DoubleBuffered = true;
+            bullets = new List<Bullet>();   //Initializes the list of bullets
+            this.DoubleBuffered = true;     //Reduces screen flickering
             this.Location = new Point(10, 10);
             
         }
 
+        //Method to populate the list of asteroids
         private void Initialize()
         {
             int[] movement = { -4, -3, -2, -1, 1, 2, 3, 4 };
@@ -55,21 +55,25 @@ namespace DodgerGame
             }
         }
 
+        //Starts the game triggering the GameLoop
         private void playToolStripMenuItem_Click(object sender, EventArgs e)
         {
             GameLoop.Start();
         }
 
+        //Closes the application
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
+        //Intructions window
         private void gameInstructionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("The player moves the ship with arrow keys and shoots with space bar.\nIf the ship reaches any of the screen borders a teleportation occurs moving the ship to the opposite side of the screen.\nDuring the game, the player must avoid colliding the ship with asteroids on the screen in order to maintain health as much as possible.\nPoints increase over time and, as a bonus, every 15 seconds the health increases by 5%.\nGame is over when the health is completely depleted.", "How to play");
+            MessageBox.Show("The player moves the ship with arrow keys and shoots with space bar.\nIf the ship reaches any of the screen borders a teleportation occurs moving the ship to the opposite side of the screen.\nDuring the game, the player must avoid colliding the ship with asteroids on the screen in order to maintain health as much as possible.\nPoints increase over time and, as a bonus, every 15 seconds the health increases by 5%.\nGame is over when the health is completely depleted.", "How to play", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        //Method to generate a single asteroid after being removed in order to keep the game running
         private void GenerateNewAsteroid()
         {
             int[] movement = { -4, -3, -2, -1, 1, 2, 3, 4 };
@@ -87,6 +91,15 @@ namespace DodgerGame
             asteroidField.Add(asteroid);
         }
 
+        //Creates a bullet
+        private void Shoot()
+        {
+            Bullet newBullet = new Bullet(new Point(player.Center.X, player.Center.Y - 90)); //Bullet is based on ship location
+            newBullet.MoveY = 15;   //The bullet moves faster than any other element on the screen
+            bullets.Add(newBullet); //Adds the new bullet to the bullets list
+        }
+
+        //Loads needed initial parameters
         private void Form1_Load(object sender, EventArgs e)
         {
             GameLoop.Interval = 10;
@@ -97,20 +110,21 @@ namespace DodgerGame
             this.FormBorderStyle = FormBorderStyle.Fixed3D;
             this.BackColor = Color.Black;
 
+            //Passes the paint method to the form
             this.Paint += new PaintEventHandler(this.PaintObjects);
         }
 
+        //Paints objects on screen
         protected void PaintObjects(Object sender,  PaintEventArgs e)
         {
 
+            //Defines the screen borders
             Pen pen = new Pen(Color.White, 2);
-
             Rectangle rectangle = new Rectangle(100, 100, 1000, 700);
-
             e.Graphics.DrawRectangle(pen, rectangle);
 
+            //Clips the region in order to not print anything beyond the region limits
             Region innerLimits = new Region(rectangle);
-
             e.Graphics.Clip = innerLimits;
 
             player.Draw(e);
@@ -126,8 +140,8 @@ namespace DodgerGame
                 {
                     asteroidField.RemoveAt(assetIndexAsteroids);
                     collisions++;
-                    this.BackColor = Color.FromArgb(255, 75, 0, 0);
-                    GenerateNewAsteroid();
+                    this.BackColor = Color.FromArgb(255, 75, 0, 0); //Flashes the screen when colliding
+                    GenerateNewAsteroid();                          //A new asteroid is generated to replace the one removed
 
                     //If the player reaches the limit of collisions, the game finishes
                     if (collisions == 100)
@@ -165,6 +179,7 @@ namespace DodgerGame
 
             }
             
+            //Removes the region limitation to draw score and health out of border limits
             e.Graphics.ResetClip();
 
             e.Graphics.DrawString($"Score: {score}", scoreFont, Brushes.White, new Point(200, 50));
@@ -172,6 +187,7 @@ namespace DodgerGame
             Rectangle healthFrame = new Rectangle(598, 55, 404, 34);
             e.Graphics.DrawRectangle(pen, healthFrame);
 
+            //Calculates the health based on collisions
             Rectangle health = new Rectangle(600, 57, 400 - (collisions * 4), 30);
             Rectangle damage = new Rectangle(1000 - (collisions * 4), 57, 0 + (collisions * 4), 30);
 
@@ -180,6 +196,7 @@ namespace DodgerGame
 
         }
 
+        //Method to move objects and set logic
         private void GameLoop_Tick(object sender, EventArgs e)
         {
             player.Move(100, 1100, 100, 800);
@@ -189,12 +206,13 @@ namespace DodgerGame
                 asteroid.Move(0, this.Size.Width, 0, this.Size.Height);
             }
             
+            //Makes every bullet move to the top
             foreach(Bullet bullet in bullets)
             {
                 bullet.MoveOnlyY();
             }
 
-            //This verifies if a bullet crossed the game border, if yes, removes the bullet 
+            //Verifies if a bullet crossed the game border, if yes, removes the bullet from the list
             int assetIndexBullets = bullets.Count - 1;
             while (assetIndexBullets >= 0)
             {
@@ -207,12 +225,14 @@ namespace DodgerGame
 
             counter++;
 
+            //Checks if counter reached 1 second and increases score
             if(counter >= 60)
             {
                 counter = 0;
                 score++;
             }
 
+            //If a score % 15 (seconds) is zero, than gives 5% increase in health to the ship
             if(score != 0 && score % 15 == 0 && counter == 0)
             {
                 if(400 - (collisions * 4) > 380)
@@ -226,16 +246,18 @@ namespace DodgerGame
     
             }
 
-            this.BackColor = Color.Black;
+            this.BackColor = Color.Black;   //When the ship collides, the screen flashes red, and here the color resets to black
             this.Refresh();
         }
 
+        //If the game is over, a popup displays stats and asks if want to play again
         private void EndGame()
         {
             GameLoop.Stop();
             DialogResult = MessageBox.Show($"You finished the game with {score} points\nWould you like to play again?", "Game over!", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk);
             if(DialogResult == DialogResult.Yes)
             {
+                //Resets everything
                 player = new Ship(new Point(600, 700));
                 asteroidField.Clear();
                 bullets.Clear();
@@ -250,6 +272,7 @@ namespace DodgerGame
             }
         }
 
+        //Check keys pressed
         private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             if(e.KeyCode == Keys.Left)
@@ -270,21 +293,16 @@ namespace DodgerGame
             }
             if(e.KeyCode == Keys.Space)
             {
+                //Calls the method to create a new bullet
                 Shoot();
             }
         }
 
-        private void Shoot()
-        {
-            Bullet newBullet = new Bullet(new Point(player.Center.X, player.Center.Y - 90));
-            newBullet.MoveY = 15;
-            bullets.Add(newBullet);
-        }
-
+        //Checks if keys pressed were released
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Left || e.KeyCode == Keys.Right) player.MoveX = 0;
-            if(e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) player.MoveY = 0; 
+            if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right) player.MoveX = 0;
+            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) player.MoveY = 0;
         }
     }
 }

@@ -29,6 +29,7 @@ namespace DodgerGame
             //g.DrawRectangle(pen, bullet);
         }
 
+        //This unique method makes the bullets move in just one direction (from bottom to top)
         public void MoveOnlyY()
         {
             int newY = Center.Y - MoveY;
